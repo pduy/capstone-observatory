@@ -33,6 +33,8 @@ object Main extends App {
   val color = Visualization.interpolateColor(colors, temperature)
   print(color.red + " " + color.green + " " + color.blue)
 
+  val image = Interaction.tile(aggregatedByLocation, colors, Tile(0, 0, 0))
+
 //  val image = Visualization.visualize(aggregatedByLocation, colors)
-//  image.output(new File("/home/duy/code/coursera/scala-capstone/observatory/plot.png"))
+  image.output(new File("/home/duy/code/coursera/scala-capstone/observatory/plot.png"))
 }
