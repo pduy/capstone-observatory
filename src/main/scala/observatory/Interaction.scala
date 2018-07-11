@@ -87,7 +87,7 @@ object Interaction {
     val maxZoom = 3
 
     def zoomNTimes(n: Int, tiles: Array[Tile]): Array[Tile] =
-      if (n == 0) tiles else Array.concat(tiles, zoomNTimes(n - 1, tiles.flatMap(splitHalf)))t
+      if (n == 0) tiles else Array.concat(tiles, zoomNTimes(n - 1, tiles.flatMap(splitHalf)))
 
     yearlyData.foreach(pair => {
       val tiles = zoomNTimes(maxZoom, Array(outMostTile))

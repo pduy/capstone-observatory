@@ -1,9 +1,20 @@
 package observatory
 
+import org.apache.spark.sql.SparkSession
+
+import scala.collection.concurrent.TrieMap
+
+
 /**
   * 4th milestone: value-added information
   */
 object Manipulation {
+
+  val gridTemperatures: TrieMap[Iterable[(Location, Temperature)], TrieMap[GridLocation, Temperature]] = TrieMap()
+  val spark = SparkSession.builder()
+    .appName("observatory")
+    .master("local[*]")
+    .getOrCreate()
 
   /**
     * @param temperatures Known temperatures
@@ -11,7 +22,10 @@ object Manipulation {
     *         returns the predicted temperature at this location
     */
   def makeGrid(temperatures: Iterable[(Location, Temperature)]): GridLocation => Temperature = {
-    ???
+    val currentGrid = gridTemperatures.getOrElseUpdate(temperatures, {TrieMap[GridLocation, Temperature]()})
+    x: GridLocation => currentGrid.getOrElseUpdate(x, {
+      Visualization.predictTemperature(temperatures, Location(lat = x.lat, lon = x.lon))
+    })
   }
 
   /**
@@ -20,7 +34,9 @@ object Manipulation {
     * @return A function that, given a latitude and a longitude, returns the average temperature at this location
     */
   def average(temperaturess: Iterable[Iterable[(Location, Temperature)]]): GridLocation => Temperature = {
-    ???
+    x: GridLocation => {
+      spark.sparkContext.parallelize(temperaturess.toList).map(t => makeGrid(t)(x)).sum * 1.0 / temperaturess.size
+    }
   }
 
   /**
@@ -29,7 +45,9 @@ object Manipulation {
     * @return A grid containing the deviations compared to the normal temperatures
     */
   def deviation(temperatures: Iterable[(Location, Temperature)], normals: GridLocation => Temperature): GridLocation => Temperature = {
-    ???
+    x: GridLocation => {
+      makeGrid(temperatures)(x) - normals(x)
+    }
   }
 
 
